@@ -31,7 +31,7 @@
 
 - Update the email addresses in the `btn-handler.jsx` file if necessary.
 
-### Running the Application
+### Running the Application 
 1. Start the Flask server:
     ```bash
     python server.py
