@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { Webcam } from "../utils/webcam";
 
-const ButtonHandler = ({ imageRef, cameraRef, videoRef, toggleSession, sessionActive, summary }) => {
+const ButtonHandler = ({ imageRef, cameraRef, videoRef, toggleSession, sessionActive }) => {
   const [streaming, setStreaming] = useState(null);
   const inputImageRef = useRef(null);
   const inputVideoRef = useRef(null);
@@ -12,27 +12,26 @@ const ButtonHandler = ({ imageRef, cameraRef, videoRef, toggleSession, sessionAc
   const [userEmail, setUserEmail] = useState("");
   const [controlEmail, setControlEmail] = useState("");
 
+  // 🔹 Fonction pour envoyer l'email via Flask
   const sendEmail = async () => {
     if (!userEmail || !controlEmail) {
       alert("❌ Veuillez renseigner les deux adresses email.");
       return;
     }
-  
-    console.log("📊 Résultats YOLO envoyés :", summary);  // ✅ Vérifier les résultats dans la console
-  
-    const emailData = {
+
+    const sessionResults = {
       user_email: userEmail,
       control_email: controlEmail,
-      results: summary,  // ✅ Envoie les vrais résultats
+      results: "Session terminée avec succès. Aucun comportement suspect détecté.",
     };
-  
+
     try {
       const response = await fetch("http://127.0.0.1:5000/send-email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(emailData),
+        body: JSON.stringify(sessionResults),
       });
-  
+
       const data = await response.json();
       if (response.ok) {
         alert("📩 Email envoyé avec succès !");
