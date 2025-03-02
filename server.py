@@ -9,6 +9,8 @@ CORS(app)
 
 SENDGRID_API_KEY = "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"  # Replace with your SendGrid key
 
+
+
 @app.route("/send-email", methods=["POST"])
 def send_email():
     data = request.json
