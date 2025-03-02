@@ -8,6 +8,8 @@
 !server.py
 !README.md
 !.gitignore
+!Procfile
+!requirements.txt
 
 # Allow directories to be traversed
 !*/
