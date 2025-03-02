@@ -11,6 +11,7 @@
 !Procfile
 !requirements.txt
 !start.sh
+!package.json
 
 # Allow directories to be traversed
 !*/
