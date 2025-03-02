@@ -111,12 +111,14 @@ const App = () => {
           <canvas ref={canvasRef} width={model.inputShape[1]} height={model.inputShape[2]} />
         </div>
 
+        {/* ✅ Passer les résultats YOLO à `ButtonHandler` */}
         <ButtonHandler 
           imageRef={imageRef} 
           cameraRef={cameraRef} 
           videoRef={videoRef} 
           toggleSession={toggleSession} 
           sessionActive={sessionActive} 
+          summary={summary}  // ✅ Maintenant, ButtonHandler reçoit les résultats
         />
 
         {summary && (

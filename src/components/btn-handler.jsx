@@ -1,75 +1,128 @@
 import { useState, useRef } from "react";
 import { Webcam } from "../utils/webcam";
 
-const ButtonHandler = ({ imageRef, cameraRef, videoRef, toggleSession, sessionActive }) => {
-  const [streaming, setStreaming] = useState(null); // streaming state
-  const inputImageRef = useRef(null); // video input reference
-  const inputVideoRef = useRef(null); // video input reference
-  const webcam = new Webcam(); // webcam handler
+const ButtonHandler = ({ imageRef, cameraRef, videoRef, toggleSession, sessionActive, summary }) => {
+  const [streaming, setStreaming] = useState(null);
+  const inputImageRef = useRef(null);
+  const inputVideoRef = useRef(null);
+  const webcam = new Webcam();
 
-  // closing image
-  const closeImage = () => {
-    const url = imageRef.current.src;
-    imageRef.current.src = "#"; // restore image source
-    URL.revokeObjectURL(url); // revoke url
+  // 🔹 États pour la modale et les emails
+  const [showModal, setShowModal] = useState(false);
+  const [userEmail, setUserEmail] = useState("");
+  const [controlEmail, setControlEmail] = useState("");
 
-    setStreaming(null); // set streaming to null
-    inputImageRef.current.value = ""; // reset input image
-    imageRef.current.style.display = "none"; // hide image
-  };
-
-  // closing video streaming
-  const closeVideo = () => {
-    const url = videoRef.current.src;
-    videoRef.current.src = ""; // restore video source
-    URL.revokeObjectURL(url); // revoke url
-
-    setStreaming(null); // set streaming to null
-    inputVideoRef.current.value = ""; // reset input video
-    videoRef.current.style.display = "none"; // hide video
-  };
-
-  // opening front-facing camera
-  const openFrontCamera = async () => {
+  const sendEmail = async () => {
+    if (!userEmail || !controlEmail) {
+      alert("❌ Veuillez renseigner les deux adresses email.");
+      return;
+    }
+  
+    console.log("📊 Résultats YOLO envoyés :", summary);  // ✅ Vérifier les résultats dans la console
+  
+    const emailData = {
+      user_email: userEmail,
+      control_email: controlEmail,
+      results: summary,  // ✅ Envoie les vrais résultats
+    };
+  
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "user" }, // Use "user" to specify the front camera
-        audio: false,
+      const response = await fetch("http://127.0.0.1:5000/send-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(emailData),
       });
-      cameraRef.current.srcObject = stream; // Attach the stream to the camera element
-      cameraRef.current.style.display = "block"; // Show the camera
-      setStreaming("frontCamera"); // Update the streaming state
-      toggleSession(); // Start session logging
+  
+      const data = await response.json();
+      if (response.ok) {
+        alert("📩 Email envoyé avec succès !");
+      } else {
+        alert("❌ Erreur d'envoi : " + data.error);
+      }
     } catch (error) {
-      alert("Error accessing front camera: " + error.message);
+      alert("❌ Impossible d'envoyer l'email : " + error.message);
     }
   };
 
-  // closing front-facing camera
+  // 🔹 Ouvrir la caméra frontale après validation des emails
+  const openFrontCamera = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "user" },
+        audio: false,
+      });
+      cameraRef.current.srcObject = stream;
+      cameraRef.current.style.display = "block";
+      setStreaming("frontCamera");
+      toggleSession();
+    } catch (error) {
+      alert("Erreur d'accès à la caméra : " + error.message);
+    }
+  };
+
+  // 🔹 Fermer la caméra frontale et envoyer l'email
   const closeFrontCamera = () => {
     const tracks = cameraRef.current.srcObject?.getTracks();
-    tracks?.forEach((track) => track.stop()); // Stop all tracks
-    cameraRef.current.srcObject = null; // Remove the video source
-    cameraRef.current.style.display = "none"; // Hide the camera
-    setStreaming(null); // Reset streaming state
-    toggleSession(); // Stop session logging and calculate summary
+    tracks?.forEach((track) => track.stop());
+    cameraRef.current.srcObject = null;
+    cameraRef.current.style.display = "none";
+    setStreaming(null);
+    toggleSession();
+
+    // 🔹 Envoyer l'email après fermeture de la session
+    sendEmail();
+  };
+
+  // 🔹 Gérer la soumission du formulaire dans la modale
+  const handleStartSession = () => {
+    if (!userEmail || !controlEmail) {
+      alert("❌ Veuillez renseigner les deux adresses email.");
+      return;
+    }
+    setShowModal(false); // Fermer la fenêtre modale
+    openFrontCamera(); // Démarrer la caméra après validation
   };
 
   return (
     <div className="btn-container">
-      {/* Front Camera Handler */}
+      {/* Bouton principal pour démarrer/arrêter la session */}
       <button
         onClick={() => {
           if (streaming === null || streaming !== "frontCamera") {
             if (streaming === "camera") webcam.close(cameraRef.current);
-            openFrontCamera(); // Open front-facing camera
+            setShowModal(true); // Afficher la modale avant de démarrer la session
           } else {
-            closeFrontCamera(); // Close front-facing camera
+            closeFrontCamera();
           }
         }}
       >
-        {streaming === "frontCamera" ? "Close The Session" : "Start The Session"}
+        {streaming === "frontCamera" ? "Fermer la session" : "Démarrer la session"}
       </button>
+
+      {/* Modale pour saisir les emails avant de commencer */}
+      {showModal && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <h2>Informations de session</h2>
+            <input
+              type="email"
+              placeholder="Votre email"
+              value={userEmail}
+              onChange={(e) => setUserEmail(e.target.value)}
+              required
+            />
+            <input
+              type="email"
+              placeholder="Email de contrôle"
+              value={controlEmail}
+              onChange={(e) => setControlEmail(e.target.value)}
+              required
+            />
+            <button onClick={handleStartSession}>Démarrer la session</button>
+            <button onClick={() => setShowModal(false)}>Annuler</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
