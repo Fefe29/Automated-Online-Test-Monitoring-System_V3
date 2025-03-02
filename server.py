@@ -7,7 +7,7 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)
 
-SENDGRID_API_KEY = "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"  # Replace with your SendGrid key
+SENDGRID_API_KEY = "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"  # Replace with your SendGrid key
 
 
 
