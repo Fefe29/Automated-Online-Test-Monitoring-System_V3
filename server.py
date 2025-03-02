@@ -7,37 +7,37 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)
 
-SENDGRID_API_KEY = "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"  # Remplace avec ta clé SendGrid
+SENDGRID_API_KEY = "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"  # Replace with your SendGrid key
 
 @app.route("/send-email", methods=["POST"])
 def send_email():
     data = request.json
     user_email = data.get("user_email")
     control_email = data.get("control_email")
-    session_results = data.get("results")
+    session_results = data.get("session_results")  # Corresponds to the key name sent from React
 
     if not user_email or not control_email or not session_results:
-        return jsonify({"error": "Données manquantes"}), 400
+        return jsonify({"error": "Missing data"}), 400
 
     message = Mail(
         from_email="fmoquet@mun.ca",
         to_emails=control_email,
-        subject="📩 Résultats de la session",
+        subject="Session Results",
         plain_text_content=f"""
-        Bonjour,
+        Hello,
 
-        📌 ID du candidat : {user_email}
-        ✅ Résultats de la session : {session_results}
+        Candidate ID: {user_email}
+        Session Results: {session_results}
 
-        Cordialement,
-        Système de Surveillance des Tests
+        Best regards,
+        Test Monitoring System
         """,
     )
 
     try:
         sg = SendGridAPIClient(SENDGRID_API_KEY)
         response = sg.send(message)
-        return jsonify({"message": "Email envoyé avec succès !"}), response.status_code
+        return jsonify({"message": "Email sent successfully!"}), response.status_code
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
