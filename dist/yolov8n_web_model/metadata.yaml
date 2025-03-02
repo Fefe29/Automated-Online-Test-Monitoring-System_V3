@@ -1,0 +1,21 @@
+description: Ultralytics YOLO11n model trained on C:/Users/mohse/Desktop/Project/Face
+  Anti-spoofing/Dataset4_CelebA_Spoof/data.yaml
+author: Ultralytics
+date: '2025-02-02T13:20:25.364928'
+version: 8.3.70
+license: AGPL-3.0 License (https://ultralytics.com/license)
+docs: https://docs.ultralytics.com
+stride: 32
+task: detect
+batch: 1
+imgsz:
+- 640
+- 640
+names:
+  0: real
+  1: spoof
+args:
+  batch: 1
+  half: false
+  int8: false
+  nms: false

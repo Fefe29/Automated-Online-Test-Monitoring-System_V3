@@ -1,0 +1,4 @@
+// filepath: /C:/Users/mohse/Desktop/Project/Web-app_V2/.babelrc
+{
+  "presets": ["@babel/preset-env", "@babel/preset-react"]
+}
