@@ -10,6 +10,7 @@
 !.gitignore
 !Procfile
 !requirements.txt
+!start.sh
 
 # Allow directories to be traversed
 !*/
